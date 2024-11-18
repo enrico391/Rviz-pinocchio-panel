@@ -36,9 +36,9 @@ install(DIRECTORY include/
 install(FILES rviz_common_plugins.xml
         DESTINATION share/${PROJECT_NAME}
 )
-#install(FILES icons/classes/SiteDataPanel.png
-#        DESTINATION share/${PROJECT_NAME}/icons/classes
-#)
+install(FILES icons/classes/DemoPanel.png
+        DESTINATION share/${PROJECT_NAME}/icons/classes
+)
 ament_export_include_directories(include)
 ament_export_targets(export_rviz_panel_tutorial)
 pluginlib_export_plugin_description_file(rviz_common rviz_common_plugins.xml)
