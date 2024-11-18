@@ -34,13 +34,13 @@
 
 /* Author: David V. Lu!! */
 
-#include <rviz_panel_tutorial/demo_panel.hpp>
 #include <QVBoxLayout>
 #include <rviz_common/display_context.hpp>
+#include <rviz_panel_tutorial/demo_panel.hpp>
 
 namespace rviz_panel_tutorial
 {
-DemoPanel::DemoPanel(QWidget* parent) : Panel(parent)
+DemoPanel::DemoPanel(QWidget * parent) : Panel(parent)
 {
   const auto layout = new QVBoxLayout(this);
   label_ = new QLabel("[no data]");
