@@ -34,20 +34,38 @@
 
 /* Author: David V. Lu!! */
 
+/* Modified by: Enrico Moro*/
+
 #include <QVBoxLayout>
 #include <rviz_common/display_context.hpp>
-#include <rviz_panel_tutorial/demo_panel.hpp>
+#include <rviz_panel_pinocchio_tiago/demo_panel.hpp>
 
-namespace rviz_panel_tutorial
+
+namespace rviz_panel_pinocchio_tiago
 {
 DemoPanel::DemoPanel(QWidget * parent) : Panel(parent)
 {
   // Create a label and a button, displayed vertically (the V in VBox means vertical)
   const auto layout = new QVBoxLayout(this);
-  label_ = new QLabel("[no data]");
-  button_ = new QPushButton("GO!");
-  layout->addWidget(label_);
+
+  label_frame_transform_ = new QLabel("");
+  label_collision_ = new QLabel("");
+
+  label_titleframe_transform_ = new QLabel("Frame Transform");
+  label_title_collision_ = new QLabel("Collision Pairs");
+
+  button_ = new QPushButton("Calculate collision pairs");
+  dropdown_ = new QComboBox();
+
+  layout->addWidget(label_titleframe_transform_);
+  layout->addWidget(label_frame_transform_);
+  layout->addWidget(label_title_collision_);
+  layout->addWidget(label_collision_);
   layout->addWidget(button_);
+  layout->addWidget(dropdown_);
+
+  // Create a PinocchioManager object
+  PinocchioManager pinocchio_manager_obj_;
 
   // Connect the event of when the button is released to our callback,
   // so pressing the button results in the callback being called.
@@ -65,28 +83,58 @@ void DemoPanel::onInitialize()
   // Get a pointer to the familiar rclcpp::Node for making subscriptions/publishers
   // (as per normal rclcpp code)
   rclcpp::Node::SharedPtr node = node_ptr_->get_raw_node();
-  publisher_ = node->create_publisher<std_msgs::msg::String>("/output", 10);
+  //publisher_ = node->create_publisher<std_msgs::msg::String>("/output", 10);
   subscription_ = node->create_subscription<std_msgs::msg::String>(
-      "/input", 10, std::bind(&DemoPanel::topicCallback, this, std::placeholders::_1));
+      "/robot_description", 10, std::bind(&DemoPanel::topicCallback, this, std::placeholders::_1));
 }
 
 // When the subscriber gets a message, this callback is triggered,
 // and then we copy its data into the widget's label
 void DemoPanel::topicCallback(const std_msgs::msg::String& msg)
 {
-  label_->setText(QString(msg.data.c_str()));
+  //create model with pinocchio
+  pinocchio_manager_obj_ = PinocchioManager(msg.data.c_str(), ament_index_cpp::get_package_share_directory("rviz_panel_pinocchio_tiago"));
+
+  dropdown_->clear();
+  
+  // Get a joint configuration
+  std::vector<std::string> joints_names = pinocchio_manager_obj_.getConfiguration();
+  for (int i = 0; i < (int)joints_names.size(); i++) {
+    dropdown_->addItem(QString::fromStdString(joints_names[i]));
+  }
+
+  
+  //label_->setText(QString(msg.data.c_str()));
 }
 
 // When the widget's button is pressed, this callback is triggered,
 // and then we publish a new message on our topic.
 void DemoPanel::buttonActivated()
 {
-  auto message = std_msgs::msg::String();
-  message.data = "Button clicked!";
-  publisher_->publish(message);
+  // set the configuration
+  pinocchio_manager_obj_.setConfiguration();
+  // perform forward kinematics
+  pinocchio_manager_obj_.performForwardKinematics();
+  // get the frame transform
+  std::string frame_transform_str = pinocchio_manager_obj_.getFrameTransform(dropdown_->currentText().toStdString());
+  // display the frame transform
+  label_frame_transform_->setText(QString::fromStdString(frame_transform_str));
+  // perform collision check
+  std::vector<std::string> collision_pairs = pinocchio_manager_obj_.performCollisionCheck();
+
+  // display the collision pairs
+  std::string collision_pairs_str;
+  for(int i = 0; i < (int)collision_pairs.size(); i++) {
+    collision_pairs_str += collision_pairs[i] + "\n";
+    
+  }
+  label_collision_->setText(QString::fromStdString(collision_pairs_str));
 }
 
-}  // namespace rviz_panel_tutorial
+
+
+
+}  // namespace rviz_panel_pinocchio_tiago
 
 #include <pluginlib/class_list_macros.hpp>
-PLUGINLIB_EXPORT_CLASS(rviz_panel_tutorial::DemoPanel, rviz_common::Panel)
+PLUGINLIB_EXPORT_CLASS(rviz_panel_pinocchio_tiago::DemoPanel, rviz_common::Panel)

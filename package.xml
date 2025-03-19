@@ -1,15 +1,19 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>rviz_panel_tutorial</name>
+  <name>rviz_panel_pinocchio_tiago</name>
   <version>0.0.0</version>
-  <description>RViz Panel Tutorial</description>
-  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
+  <description>RViz Panel for pinocchio tiago</description>
+  <maintainer email="enrimoro003@gmail.com">Enrico Moro!!</maintainer>
   <license>BSD</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>pluginlib</depend>
   <depend>rviz_common</depend>
+  <depend>pinocchio</depend>
+  <depend>ament_index_cpp</depend>
+  <depend>eigen</depend>
+  <depend>eigen3_cmake_module</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
