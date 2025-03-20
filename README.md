@@ -5,3 +5,5 @@ Modified version of tutorial https://docs.ros.org/en/humble/Tutorials/Intermedia
 Simple plugin for interact with pinocchio library through rviz
 
 I made this for use-case and GSoC2025 selection
+
+![RViz Panel](img/rviz_plugin.png)

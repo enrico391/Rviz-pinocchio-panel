@@ -14,6 +14,7 @@ find_package(Eigen3 REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 qt5_wrap_cpp(MOC_FILES
@@ -33,9 +34,10 @@ ament_target_dependencies(demo_panel
   Eigen3
   eigen3_cmake_module
   rclcpp
+  sensor_msgs
 )
 
-target_link_libraries(demo_panel pinocchio::pinocchio)
+target_link_libraries(demo_panel pinocchio::pinocchio )
 
 install(TARGETS demo_panel
         EXPORT export_rviz_panel_pinocchio_tiago

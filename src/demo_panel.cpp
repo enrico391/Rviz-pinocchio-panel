@@ -83,9 +83,25 @@ void DemoPanel::onInitialize()
   // Get a pointer to the familiar rclcpp::Node for making subscriptions/publishers
   // (as per normal rclcpp code)
   rclcpp::Node::SharedPtr node = node_ptr_->get_raw_node();
-  //publisher_ = node->create_publisher<std_msgs::msg::String>("/output", 10);
+  
+  //define robot description subscriber
   subscription_ = node->create_subscription<std_msgs::msg::String>(
       "/robot_description", 10, std::bind(&DemoPanel::topicCallback, this, std::placeholders::_1));
+  
+  //define joint state subscriber
+  subscription_joint_state_ = node->create_subscription<sensor_msgs::msg::JointState>(
+    "/joint_states", 10, std::bind(&DemoPanel::topicJointStateCallback, this, std::placeholders::_1));
+}
+
+void DemoPanel::topicJointStateCallback(const sensor_msgs::msg::JointState& msg)
+{
+  std::cout << "Joint names: ";
+  for (const auto& name : msg.position) {
+    std::cout << name << " ";
+  }
+  std::cout << std::endl;
+
+  pinocchio_manager_obj_.setConfiguration(msg.position);
 }
 
 // When the subscriber gets a message, this callback is triggered,
@@ -112,7 +128,7 @@ void DemoPanel::topicCallback(const std_msgs::msg::String& msg)
 void DemoPanel::buttonActivated()
 {
   // set the configuration
-  pinocchio_manager_obj_.setConfiguration();
+  //pinocchio_manager_obj_.setConfiguration();
   // perform forward kinematics
   pinocchio_manager_obj_.performForwardKinematics();
   // get the frame transform

@@ -55,6 +55,7 @@
 #include <rviz_common/panel.hpp>
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
 #include <std_msgs/msg/string.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
 #include <sstream>
 
 
@@ -68,7 +69,7 @@ class PinocchioManager {
 
     PinocchioManager(const std::string& urdf_xml, const std::string& package_share_directory);
   
-    void setConfiguration();
+    void setConfiguration(const std::vector<double>);
     std::vector<std::string>  getConfiguration();
     void performForwardKinematics();
     void performJacobian(const std::string& arm_link);
@@ -100,7 +101,12 @@ protected:
   //rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;
 
+  // subscriber to joint_state topic
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr subscription_joint_state_;
+
   void topicCallback(const std_msgs::msg::String& msg); // callback for topic robot_description
+
+  void topicJointStateCallback(const sensor_msgs::msg::JointState& msg);
 
   QLabel * label_titleframe_transform_; // label to show possible collisions
   QLabel * label_frame_transform_; // label to show possible collisions

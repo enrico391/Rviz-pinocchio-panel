@@ -28,19 +28,34 @@ PinocchioManager::PinocchioManager(const std::string& urdf_xml, const std::strin
     collision_data = collision_data_model;
 }
 
-void PinocchioManager::setConfiguration() {
+void PinocchioManager::setConfiguration(const std::vector<double> q_conf) {
     std::cout << "Joint configuration: " << std::endl << model.nq << std::endl << std::endl;
     Eigen::VectorXd config(model.nq);
     q = config;
-    //TODO set the configuration with custom values
-    q << 0.0, 0.0, 0.0, 1.36, -0.0, -0.0, 2.22, 0.0, -0.0, -0.0, -0.0, -0.0, -0.0, -0.0, 0.0, 0.0;
+
+    //TODO fix error number of joint 14 instead of 16 
+    
+    for(int i = 0; i < (int)q.size(); i++){
+        if (i == 0){
+            q[i] = 0.0; //for first 
+        } 
+        else if (i == (model.nq - 1)) {
+            q[i] = 0.0; // for last
+        } else {
+            q[i] = q_conf[i-1];
+        }
+        
+    }
+
+    std::cout << "Configuration vector q: " << q.transpose() << std::endl;
+    //q << 0.0, 0.0, 0.0, 1.36, -0.0, -0.0, 2.22, 0.0, -0.0, -0.0, -0.0, -0.0, -0.0, -0.0, 0.0, 0.0;
     std::cout << "Configuration done " << std::endl;
 }
 
 
 std::vector<std::string>  PinocchioManager::getConfiguration() {
     std::vector<std::string> frame_names;
-    for (int joint_id = 0; joint_id < model.njoints; ++joint_id) {
+    for (int joint_id = 0; joint_id < model.njoints; joint_id++) {
         frame_names.push_back(model.names[joint_id]);
     }
 
