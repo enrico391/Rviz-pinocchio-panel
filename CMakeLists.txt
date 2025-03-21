@@ -16,18 +16,20 @@ find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 set(CMAKE_AUTOMOC ON)
 qt5_wrap_cpp(MOC_FILES
-  include/rviz_panel_pinocchio_tiago/demo_panel.hpp
+  include/rviz_panel_pinocchio_tiago/pinocchio_panel_manage.hpp
 )
 
-add_library(demo_panel src/demo_panel.cpp src/pinocchio_manage.cpp ${MOC_FILES})
+add_library(pinocchio_panel_manage src/pinocchio_panel_manage.cpp src/pinocchio_manage.cpp ${MOC_FILES})
 
-target_include_directories(demo_panel PUBLIC
+target_include_directories(pinocchio_panel_manage PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(demo_panel
+ament_target_dependencies(pinocchio_panel_manage
   pluginlib
   rviz_common
   ament_index_cpp
@@ -37,9 +39,9 @@ ament_target_dependencies(demo_panel
   sensor_msgs
 )
 
-target_link_libraries(demo_panel pinocchio::pinocchio )
+target_link_libraries(pinocchio_panel_manage pinocchio::pinocchio )
 
-install(TARGETS demo_panel
+install(TARGETS pinocchio_panel_manage
         EXPORT export_rviz_panel_pinocchio_tiago
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib

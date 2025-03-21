@@ -1,5 +1,5 @@
-<library path="demo_panel">
-  <class type="rviz_panel_pinocchio_tiago::DemoPanel" base_class_type="rviz_common::Panel">
+<library path="pinocchio_panel_manage">
+  <class type="rviz_panel_pinocchio_tiago::PinocchioPanelManage" base_class_type="rviz_common::Panel">
     <description>Rviz panel for tiago pinocchio</description>
   </class>
 </library>

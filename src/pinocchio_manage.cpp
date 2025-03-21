@@ -1,6 +1,6 @@
 // Description: Class to manage the Pinocchio model
 
-#include <rviz_panel_pinocchio_tiago/demo_panel.hpp>
+#include <rviz_panel_pinocchio_tiago/pinocchio_panel_manage.hpp>
 
 #define PINOCCHIO_ENABLE_COMPATIBILITY_WITH_VERSION_2
 

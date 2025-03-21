@@ -87,12 +87,12 @@ class PinocchioManager {
 
 
 
-class DemoPanel : public rviz_common::Panel
+class PinocchioPanelManage : public rviz_common::Panel
 {
   Q_OBJECT
 public:
-  explicit DemoPanel(QWidget * parent = 0);
-  ~DemoPanel() override;
+  explicit PinocchioPanelManage(QWidget * parent = 0);
+  ~PinocchioPanelManage() override;
 
   void onInitialize() override;
 

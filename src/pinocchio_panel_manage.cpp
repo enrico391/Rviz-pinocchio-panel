@@ -38,12 +38,12 @@
 
 #include <QVBoxLayout>
 #include <rviz_common/display_context.hpp>
-#include <rviz_panel_pinocchio_tiago/demo_panel.hpp>
+#include <rviz_panel_pinocchio_tiago/pinocchio_panel_manage.hpp>
 
 
 namespace rviz_panel_pinocchio_tiago
 {
-DemoPanel::DemoPanel(QWidget * parent) : Panel(parent)
+PinocchioPanelManage::PinocchioPanelManage(QWidget * parent) : Panel(parent)
 {
   // Create a label and a button, displayed vertically (the V in VBox means vertical)
   const auto layout = new QVBoxLayout(this);
@@ -69,12 +69,12 @@ DemoPanel::DemoPanel(QWidget * parent) : Panel(parent)
 
   // Connect the event of when the button is released to our callback,
   // so pressing the button results in the callback being called.
-  QObject::connect(button_, &QPushButton::released, this, &DemoPanel::buttonActivated);
+  QObject::connect(button_, &QPushButton::released, this, &PinocchioPanelManage::buttonActivated);
 }
 
-DemoPanel::~DemoPanel() = default;
+PinocchioPanelManage::~PinocchioPanelManage() = default;
 
-void DemoPanel::onInitialize()
+void PinocchioPanelManage::onInitialize()
 {
   // Access the abstract ROS Node and
   // in the process lock it for exclusive use until the method is done.
@@ -86,14 +86,14 @@ void DemoPanel::onInitialize()
   
   //define robot description subscriber
   subscription_ = node->create_subscription<std_msgs::msg::String>(
-      "/robot_description", 10, std::bind(&DemoPanel::topicCallback, this, std::placeholders::_1));
+      "/robot_description", 10, std::bind(&PinocchioPanelManage::topicCallback, this, std::placeholders::_1));
   
   //define joint state subscriber
   subscription_joint_state_ = node->create_subscription<sensor_msgs::msg::JointState>(
-    "/joint_states", 10, std::bind(&DemoPanel::topicJointStateCallback, this, std::placeholders::_1));
+    "/joint_states", 10, std::bind(&PinocchioPanelManage::topicJointStateCallback, this, std::placeholders::_1));
 }
 
-void DemoPanel::topicJointStateCallback(const sensor_msgs::msg::JointState& msg)
+void PinocchioPanelManage::topicJointStateCallback(const sensor_msgs::msg::JointState& msg)
 {
   std::cout << "Joint names: ";
   for (const auto& name : msg.position) {
@@ -106,7 +106,7 @@ void DemoPanel::topicJointStateCallback(const sensor_msgs::msg::JointState& msg)
 
 // When the subscriber gets a message, this callback is triggered,
 // and then we copy its data into the widget's label
-void DemoPanel::topicCallback(const std_msgs::msg::String& msg)
+void PinocchioPanelManage::topicCallback(const std_msgs::msg::String& msg)
 {
   //create model with pinocchio
   pinocchio_manager_obj_ = PinocchioManager(msg.data.c_str(), ament_index_cpp::get_package_share_directory("rviz_panel_pinocchio_tiago"));
@@ -125,7 +125,7 @@ void DemoPanel::topicCallback(const std_msgs::msg::String& msg)
 
 // When the widget's button is pressed, this callback is triggered,
 // and then we publish a new message on our topic.
-void DemoPanel::buttonActivated()
+void PinocchioPanelManage::buttonActivated()
 {
   // set the configuration
   //pinocchio_manager_obj_.setConfiguration();
@@ -144,6 +144,7 @@ void DemoPanel::buttonActivated()
     collision_pairs_str += collision_pairs[i] + "\n";
     
   }
+  label_collision_->clear();
   label_collision_->setText(QString::fromStdString(collision_pairs_str));
 }
 
@@ -153,4 +154,4 @@ void DemoPanel::buttonActivated()
 }  // namespace rviz_panel_pinocchio_tiago
 
 #include <pluginlib/class_list_macros.hpp>
-PLUGINLIB_EXPORT_CLASS(rviz_panel_pinocchio_tiago::DemoPanel, rviz_common::Panel)
+PLUGINLIB_EXPORT_CLASS(rviz_panel_pinocchio_tiago::PinocchioPanelManage, rviz_common::Panel)
