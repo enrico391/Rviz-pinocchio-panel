@@ -13,4 +13,4 @@ I made this for use-case and GSoC2025 selection
 Watch the demo video to see the RViz panel in action:
 
 
-[![Watch the video](img/rviz_plugin.png)](https://raw.githubusercontent.com/enrico391/Rviz-pinocchio-panel/blob/main/img/video_rviz_panel.mp4)
+[![Watch the video](img/rviz_plugin.png)](https://github.com/enrico391/Rviz-pinocchio-panel/blob/main/img/video_rviz_panel.mp4)
