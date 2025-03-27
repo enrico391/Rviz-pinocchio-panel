@@ -132,8 +132,6 @@ void PinocchioPanelManage::topicCallback(const std_msgs::msg::String& msg)
     dropdown_->addItem(QString::fromStdString(joints_names[i]));
   }
 
-  
-
 }
 
 // When the widget's button is pressed, this callback is triggered,
@@ -166,19 +164,23 @@ void PinocchioPanelManage::buttonActivated()
 // When the widget's button is pressed, this callback is triggered,
 // and then we publish a new message on our topic.
 void PinocchioPanelManage::buttonGetTorque()
-{
+{ 
+  // set current configuration
   pinocchio_manager_obj_.setConfiguration(position_joints_);
-  // std::vector<double> torque_data = pinocchio_manager_obj_.performTorqueEstimation();
-  // std::vector<std::string> joints_names = pinocchio_manager_obj_.getConfiguration();
 
+  // perform torque estimation
+  std::vector<double> torque_data = pinocchio_manager_obj_.performTorqueEstimation();
+  // get joints with DOFs
+  std::vector<std::string> joints_names = pinocchio_manager_obj_.getActiveJointsName();
 
-  // std::string torque_string;
-  // for(int i = 0; i < (int)joints_names.size(); i++) {
-  //   torque_string += joints_names[i] + ": " + std::to_string(torque_data[i]) + "\n";
-  // }
+  // create string to display torque values
+  std::string torque_string;
+  for(int i = 0; i < (int)joints_names.size(); i++) {
+    torque_string += joints_names[i] + ": " + std::to_string(torque_data[i]) + "\n";
+  }
 
-  // label_collision_->clear();
-  // label_collision_->setText(QString::fromStdString(torque_string));
+  label_collision_->clear();
+  label_collision_->setText(QString::fromStdString(torque_string));
 }
 
 

@@ -76,6 +76,20 @@ std::vector<std::string>  PinocchioManager::getConfiguration() {
 }
 
 
+std::vector<std::string>  PinocchioManager::getActiveJointsName() {
+    std::vector<std::string> joints_names;
+    
+    // Filter and add only active joint names to the vector of strings
+    for (size_t i = 1; i < model.joints.size(); ++i) { // Joint index starts from 1
+        if (model.joints[i].nq() > 0) {  // Movable joints have nq > 0
+            joints_names.push_back(model.names[i]);
+        }
+    }
+    
+    return joints_names; 
+}
+
+
 void PinocchioManager::performForwardKinematics() {
     pinocchio::framesForwardKinematics(model, data, q);
 }
@@ -85,11 +99,12 @@ std::vector<double> PinocchioManager::performTorqueEstimation() {
     Eigen::VectorXd v = Eigen::VectorXd::Zero(model.nv); // in rad/s 
     Eigen::VectorXd a = Eigen::VectorXd::Zero(model.nv); // in rad/s² 
     Eigen::VectorXd tau = pinocchio::rnea(model, data, q, v, a);
-
-    std::vector<double> joint_torques;
+    
+    std::vector<double> joint_torques(data.tau.size());
     for(int i = 0; i < (int)data.tau.size(); i++){
         joint_torques[i] = data.tau[i];
     }
+
     return joint_torques;
 }
 

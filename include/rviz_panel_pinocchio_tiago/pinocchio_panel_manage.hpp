@@ -72,6 +72,7 @@ class PinocchioManager {
   
     void setConfiguration(const std::vector<double>);
     std::vector<std::string>  getConfiguration();
+    std::vector<std::string> getActiveJointsName();
     void performForwardKinematics();
     void performJacobian(const std::string& arm_link);
     std::vector<std::string> performCollisionCheck();
