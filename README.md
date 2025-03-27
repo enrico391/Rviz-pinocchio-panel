@@ -11,4 +11,4 @@ I made this for use-case and GSoC2025 selection
 
 Watch the demo video to see the RViz panel in action: (click for video)
 
-[![Watch the video demo](img/rviz_plugin.png)](https://youtu.be/DbFwfg3cQ5A)
+[![Watch the video demo](img/rviz_plugin.png)](https://youtu.be/mmP-8mRg5ss)
