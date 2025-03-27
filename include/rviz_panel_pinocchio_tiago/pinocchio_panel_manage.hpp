@@ -41,6 +41,7 @@
 #include "pinocchio/algorithm/frames.hpp"
 #include "pinocchio/algorithm/geometry.hpp"
 #include "pinocchio/algorithm/jacobian.hpp"
+#include "pinocchio/algorithm/rnea.hpp"
 #include "pinocchio/algorithm/joint-configuration.hpp"
 #include "pinocchio/parsers/urdf.hpp"
 #include "pinocchio/parsers/srdf.hpp"
@@ -75,6 +76,7 @@ class PinocchioManager {
     void performJacobian(const std::string& arm_link);
     std::vector<std::string> performCollisionCheck();
     std::string getFrameTransform(const std::string& arm_link);
+    std::vector<double> performTorqueEstimation();
   
   private:
     pinocchio::Model model;
@@ -113,19 +115,20 @@ protected:
   QLabel * label_title_collision_; // label to show possible collisions
   QLabel * label_collision_; // label to show possible collisions
   QPushButton * button_; // button to calculate collision and other stuff
+  QPushButton * buttonTorque_; // button to calculate collision and other stuff
   QComboBox * dropdown_; // dropdown menu to select options
   
 
   std::string jacobian_; // string to store jacobian
   std::string collision_pairs_; // string to store collision pairs
-
+  std::vector<double> position_joints_;
   // obj for PinocchioManager
   PinocchioManager pinocchio_manager_obj_;
 
 
 private Q_SLOTS:
   void buttonActivated();
-  
+  void buttonGetTorque();
 };
 
 

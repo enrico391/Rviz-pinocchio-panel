@@ -55,6 +55,7 @@ PinocchioPanelManage::PinocchioPanelManage(QWidget * parent) : Panel(parent)
   label_title_collision_ = new QLabel("Collision Pairs");
 
   button_ = new QPushButton("Calculate collision pairs");
+  buttonTorque_ = new QPushButton("Calculate Torque");
   dropdown_ = new QComboBox();
 
   layout->addWidget(label_titleframe_transform_);
@@ -62,14 +63,22 @@ PinocchioPanelManage::PinocchioPanelManage(QWidget * parent) : Panel(parent)
   layout->addWidget(label_title_collision_);
   layout->addWidget(label_collision_);
   layout->addWidget(button_);
+  layout->addWidget(buttonTorque_);
   layout->addWidget(dropdown_);
+
+  // disable buttons 
+  button_->setEnabled(false);
+  buttonTorque_->setEnabled(false);
 
   // Create a PinocchioManager object
   PinocchioManager pinocchio_manager_obj_;
 
+  
+
   // Connect the event of when the button is released to our callback,
   // so pressing the button results in the callback being called.
   QObject::connect(button_, &QPushButton::released, this, &PinocchioPanelManage::buttonActivated);
+  QObject::connect(buttonTorque_, &QPushButton::released, this, &PinocchioPanelManage::buttonGetTorque);
 }
 
 PinocchioPanelManage::~PinocchioPanelManage() = default;
@@ -95,32 +104,36 @@ void PinocchioPanelManage::onInitialize()
 
 void PinocchioPanelManage::topicJointStateCallback(const sensor_msgs::msg::JointState& msg)
 {
-  std::cout << "Joint names: ";
-  for (const auto& name : msg.position) {
-    std::cout << name << " ";
-  }
-  std::cout << std::endl;
-
-  pinocchio_manager_obj_.setConfiguration(msg.position);
+  // std::cout << "Joint names: ";
+  // for (const auto& name : msg.name) {
+  //   std::cout << name << " ";
+  // }
+  // std::cout << std::endl;
+  position_joints_ = msg.position;
+  //pinocchio_manager_obj_.setConfiguration(msg.position);
 }
 
 // When the subscriber gets a message, this callback is triggered,
 // and then we copy its data into the widget's label
 void PinocchioPanelManage::topicCallback(const std_msgs::msg::String& msg)
 {
+  // enable buttons
+  button_->setEnabled(true);
+  buttonTorque_->setEnabled(true);
+
   //create model with pinocchio
   pinocchio_manager_obj_ = PinocchioManager(msg.data.c_str(), ament_index_cpp::get_package_share_directory("rviz_panel_pinocchio_tiago"));
 
   dropdown_->clear();
   
-  // Get a joint configuration
+  // Get a joint configuration and add to doropdown menu
   std::vector<std::string> joints_names = pinocchio_manager_obj_.getConfiguration();
   for (int i = 0; i < (int)joints_names.size(); i++) {
     dropdown_->addItem(QString::fromStdString(joints_names[i]));
   }
 
   
-  //label_->setText(QString(msg.data.c_str()));
+
 }
 
 // When the widget's button is pressed, this callback is triggered,
@@ -145,7 +158,27 @@ void PinocchioPanelManage::buttonActivated()
     
   }
   label_collision_->clear();
+  
   label_collision_->setText(QString::fromStdString(collision_pairs_str));
+}
+
+
+// When the widget's button is pressed, this callback is triggered,
+// and then we publish a new message on our topic.
+void PinocchioPanelManage::buttonGetTorque()
+{
+  pinocchio_manager_obj_.setConfiguration(position_joints_);
+  // std::vector<double> torque_data = pinocchio_manager_obj_.performTorqueEstimation();
+  // std::vector<std::string> joints_names = pinocchio_manager_obj_.getConfiguration();
+
+
+  // std::string torque_string;
+  // for(int i = 0; i < (int)joints_names.size(); i++) {
+  //   torque_string += joints_names[i] + ": " + std::to_string(torque_data[i]) + "\n";
+  // }
+
+  // label_collision_->clear();
+  // label_collision_->setText(QString::fromStdString(torque_string));
 }
 
 

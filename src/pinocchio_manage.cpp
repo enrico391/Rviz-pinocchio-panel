@@ -30,20 +30,26 @@ PinocchioManager::PinocchioManager(const std::string& urdf_xml, const std::strin
 
 void PinocchioManager::setConfiguration(const std::vector<double> q_conf) {
     std::cout << "Joint configuration: " << std::endl << model.nq << std::endl << std::endl;
+    
     Eigen::VectorXd config(model.nq);
     q = config;
 
-    //TODO fix error number of joint 14 instead of 16 
     
-    for(int i = 0; i < (int)q.size(); i++){
-        if (i == 0){
-            q[i] = 0.0; //for first 
+    int cont = 0;
+    // start from 1 to skip universe joint
+    for(int i = 1; i <= (int)q_conf.size(); ++i){
+        std::cout <<" i: " << i << " cont : " << cont << model.names[i] <<std::endl;
+        // for continuous joints (e.g wheels)
+        if (model.joints[i].nq() == 2){
+            q[cont] = cos(q_conf[i-1]);
+            q[cont+1] = sin(q_conf[i-1]);
         } 
-        else if (i == (model.nq - 1)) {
-            q[i] = 0.0; // for last
-        } else {
-            q[i] = q_conf[i-1];
+        // normal joint type revolute or prismatic
+        else {
+            q[cont] = q_conf[i-1];
         }
+        cont += (int)model.joints[i].nq();
+        
         
     }
 
@@ -55,8 +61,15 @@ void PinocchioManager::setConfiguration(const std::vector<double> q_conf) {
 
 std::vector<std::string>  PinocchioManager::getConfiguration() {
     std::vector<std::string> frame_names;
-    for (int joint_id = 0; joint_id < model.njoints; joint_id++) {
-        frame_names.push_back(model.names[joint_id]);
+    // get the names of the frames and add to the vector of strings
+    for (const auto &frame : model.frames) {
+        frame_names.push_back(frame.name);
+    }
+
+    for (size_t i = 1; i < model.joints.size(); ++i) { // Joint index starts from 1
+        if (model.joints[i].nq() > 0) {  // Movable joints have nq > 0
+            std::cout << "Joint " << i << ": " << model.names[i] << " (DOFs: " << model.joints[i].nq() << ")" << std::endl;
+        }
     }
 
     return frame_names; 
@@ -67,10 +80,23 @@ void PinocchioManager::performForwardKinematics() {
     pinocchio::framesForwardKinematics(model, data, q);
 }
 
+//TODO
+std::vector<double> PinocchioManager::performTorqueEstimation() {
+    Eigen::VectorXd v = Eigen::VectorXd::Zero(model.nv); // in rad/s 
+    Eigen::VectorXd a = Eigen::VectorXd::Zero(model.nv); // in rad/s² 
+    Eigen::VectorXd tau = pinocchio::rnea(model, data, q, v, a);
+
+    std::vector<double> joint_torques;
+    for(int i = 0; i < (int)data.tau.size(); i++){
+        joint_torques[i] = data.tau[i];
+    }
+    return joint_torques;
+}
+
 
 std::string PinocchioManager::getFrameTransform(const std::string& arm_link_name) {
     const auto arm_link = model.getFrameId(arm_link_name);
-    std::cout << "Frame transform: " << std::endl << data.oMf[arm_link] << std::endl;
+    //std::cout << "Frame transform: " << std::endl << data.oMf[arm_link] << std::endl;
     std::ostringstream oss;
     oss << data.oMf[arm_link];
     return oss.str();
@@ -98,7 +124,7 @@ std::vector<std::string> PinocchioManager::performCollisionCheck() {
         const auto& body2 = collision_model.geometryObjects[cp.second].name;
         
         collision_pairs.push_back("Collision detected between " + body1 + " and " + body2);
-        std::cout << "Collision detected between " << body1 << " and " << body2 << std::endl;
+        //std::cout << "Collision detected between " << body1 << " and " << body2 << std::endl;
       }
     }
 
