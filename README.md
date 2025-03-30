@@ -1,4 +1,5 @@
 # rviz panel for pinocchio library
+**-> New version:** https://github.com/enrico391/Rviz-pinocchio-panel
 
 Modified version of tutorial https://docs.ros.org/en/humble/Tutorials/Intermediate/RViz/RViz-Custom-Panel/RViz-Custom-Panel.html
 
