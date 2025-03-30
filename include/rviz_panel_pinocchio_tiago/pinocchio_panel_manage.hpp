@@ -53,6 +53,9 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QComboBox>
+#include <QLineEdit>
+#include <QHBoxLayout>
+#include <QDoubleValidator>
 #include <rviz_common/panel.hpp>
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
 #include <std_msgs/msg/string.hpp>
@@ -70,14 +73,15 @@ class PinocchioManager {
 
     PinocchioManager(const std::string& urdf_xml, const std::string& package_share_directory);
   
-    void setConfiguration(const std::vector<double>);
-    std::vector<std::string>  getConfiguration();
-    std::vector<std::string> getActiveJointsName();
-    void performForwardKinematics();
-    void performJacobian(const std::string& arm_link);
-    std::vector<std::string> performCollisionCheck();
-    std::string getFrameTransform(const std::string& arm_link);
-    std::vector<double> performTorqueEstimation();
+    void setConfiguration(const std::vector<double>&); // set the initial configuration
+    std::vector<std::string>  getConfiguration(); // get the configuration stored
+    std::vector<std::string> getActiveJointsName(); // get the active joints names (e.g. not fixed)
+    void performForwardKinematics(); // perform forward kinematics
+    void performJacobian(const std::string& arm_link); // perform jacobian
+    std::vector<std::string> performCollisionCheck(); // perform collision check
+    std::string getFrameTransform(const std::string& arm_link); // get the frame transform ok a selected link
+    std::vector<double> performTorqueEstimation(); // perform torque estimation
+    void addPayloadMass(const double& mass); // add payload mass to the model
   
   private:
     pinocchio::Model model;
@@ -85,6 +89,15 @@ class PinocchioManager {
     pinocchio::GeometryModel visual_model;
     pinocchio::GeometryModel collision_model;
     pinocchio::GeometryData collision_data;
+
+    pinocchio::Model model_backup; // use to restore the model when a mass is added
+    pinocchio::Data data_backup; // use to restore the model when a mass is added
+    pinocchio::GeometryModel visual_model_backup; // use to restore the model when a mass is added
+    pinocchio::GeometryModel collision_model_backup; // use to restore the model when a mass is added
+    pinocchio::GeometryData collision_data_backup; // use to restore the model when a mass is added
+
+    bool massAdded = false; // flag to check if mass is added
+
     Eigen::VectorXd q;
 };
 
@@ -118,8 +131,11 @@ protected:
   QPushButton * button_; // button to calculate collision and other stuff
   QPushButton * buttonTorque_; // button to calculate collision and other stuff
   QComboBox * dropdown_; // dropdown menu to select options
+  QLabel * label_payload_; // label for payload mass input
+  QLineEdit * input_payload_; // input field for payload mass
+  QHBoxLayout * payload_layout; 
   
-
+  double payload_mass_; // to store the payload mass value
   std::string jacobian_; // string to store jacobian
   std::string collision_pairs_; // string to store collision pairs
   std::vector<double> position_joints_;

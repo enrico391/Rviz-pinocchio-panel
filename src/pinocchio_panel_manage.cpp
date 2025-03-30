@@ -58,6 +58,15 @@ PinocchioPanelManage::PinocchioPanelManage(QWidget * parent) : Panel(parent)
   buttonTorque_ = new QPushButton("Calculate Torque");
   dropdown_ = new QComboBox();
 
+  // horizontal layout for the payload section
+  payload_layout = new QHBoxLayout();
+  label_payload_ = new QLabel("Payload mass (kg):");
+  // Create and set up the input field
+  input_payload_ = new QLineEdit("0.0");
+  input_payload_->setFixedWidth(80); // Set a reasonable width
+  input_payload_->setAlignment(Qt::AlignRight); // Right-align the text
+
+
   layout->addWidget(label_titleframe_transform_);
   layout->addWidget(label_frame_transform_);
   layout->addWidget(label_title_collision_);
@@ -65,6 +74,13 @@ PinocchioPanelManage::PinocchioPanelManage(QWidget * parent) : Panel(parent)
   layout->addWidget(button_);
   layout->addWidget(buttonTorque_);
   layout->addWidget(dropdown_);
+
+  // Add the widgets to the horizontal layout
+  payload_layout->addWidget(label_payload_);
+  payload_layout->addWidget(input_payload_);
+  payload_layout->addStretch(); // This pushes the widgets to the left
+  // add to the main layout
+  layout->addLayout(payload_layout);
 
   // disable buttons 
   button_->setEnabled(false);
@@ -79,6 +95,11 @@ PinocchioPanelManage::PinocchioPanelManage(QWidget * parent) : Panel(parent)
   // so pressing the button results in the callback being called.
   QObject::connect(button_, &QPushButton::released, this, &PinocchioPanelManage::buttonActivated);
   QObject::connect(buttonTorque_, &QPushButton::released, this, &PinocchioPanelManage::buttonGetTorque);
+  // Connect event payload changes 
+  QObject::connect(input_payload_, &QLineEdit::textChanged, this, [this](const QString& text) {
+    payload_mass_ = text.toDouble(); // This will convert to 0.0 if text is invalid
+  });
+
 }
 
 PinocchioPanelManage::~PinocchioPanelManage() = default;
@@ -110,11 +131,12 @@ void PinocchioPanelManage::topicJointStateCallback(const sensor_msgs::msg::Joint
   // }
   // std::cout << std::endl;
   position_joints_ = msg.position;
+
   //pinocchio_manager_obj_.setConfiguration(msg.position);
 }
 
 // When the subscriber gets a message, this callback is triggered,
-// and then we copy its data into the widget's label
+// load the model from robot_description topic
 void PinocchioPanelManage::topicCallback(const std_msgs::msg::String& msg)
 {
   // enable buttons
@@ -134,8 +156,7 @@ void PinocchioPanelManage::topicCallback(const std_msgs::msg::String& msg)
 
 }
 
-// When the widget's button is pressed, this callback is triggered,
-// and then we publish a new message on our topic.
+// Perform collision check .
 void PinocchioPanelManage::buttonActivated()
 {
   // set the configuration
@@ -165,6 +186,9 @@ void PinocchioPanelManage::buttonActivated()
 // and then we publish a new message on our topic.
 void PinocchioPanelManage::buttonGetTorque()
 { 
+   // add payload mass to the model
+   pinocchio_manager_obj_.addPayloadMass(payload_mass_);
+  
   // set current configuration
   pinocchio_manager_obj_.setConfiguration(position_joints_);
 

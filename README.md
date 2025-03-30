@@ -12,3 +12,10 @@ I made this for use-case and GSoC2025 selection
 Watch the demo video to see the RViz panel in action: (click for video)
 
 [![Watch the video demo](img/rviz_plugin.png)](https://youtu.be/mmP-8mRg5ss)
+
+
+## Usage
+- Clone the repo inside your robot workspace
+- Build the package: ``` colcon build --packages-select rviz_panel_pinocchio_tiago ```
+- Start rviz
+- Add panel to rviz
